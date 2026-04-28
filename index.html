@@ -1,0 +1,931 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nationale Regeldruk Meter — MKB Regelradar</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --navy: #1a365d;
+      --navy-dark: #0f2240;
+      --navy-light: #2a4a7f;
+      --amber: #FBBF24;
+      --amber-glow: rgba(251, 191, 36, 0.3);
+      --amber-dark: #F59E0B;
+      --white: #ffffff;
+      --white-70: rgba(255,255,255,0.7);
+      --white-40: rgba(255,255,255,0.4);
+      --white-15: rgba(255,255,255,0.15);
+      --white-08: rgba(255,255,255,0.08);
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: var(--navy-dark);
+      color: var(--white);
+      min-height: 100vh;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    /* ── § Regen Achtergrond ── */
+    #rain-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.06;
+    }
+
+    /* ── Alle content boven rain ── */
+    header, main, footer {
+      position: relative;
+      z-index: 1;
+    }
+
+    /* ── Header ── */
+    header {
+      background: rgba(15, 34, 64, 0.95);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--white-15);
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .header-logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .logo-icon {
+      width: 52px;
+      height: 52px;
+      background: var(--amber);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      color: var(--navy-dark);
+      font-weight: 900;
+      flex-shrink: 0;
+    }
+
+    .logo-text h1 {
+      font-size: 17px;
+      font-weight: 800;
+      color: var(--white);
+      line-height: 1.1;
+      letter-spacing: -0.3px;
+    }
+
+    .logo-text p {
+      font-size: 12px;
+      color: var(--white-70);
+      font-weight: 400;
+    }
+
+    .logo-text a {
+      color: var(--amber);
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .logo-text a:hover {
+      text-decoration: underline;
+    }
+
+    .header-cta {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    @media (max-width: 480px) {
+      .header-cta { display: none; }
+    }
+
+    /* ── Hero Sectie ── */
+    .hero {
+      background: linear-gradient(180deg, var(--navy-dark) 0%, var(--navy) 40%, var(--navy-dark) 100%);
+      padding: 72px 24px 80px;
+      text-align: center;
+    }
+
+    .hero-label {
+      display: inline-block;
+      background: var(--white-08);
+      border: 1px solid var(--white-15);
+      border-radius: 100px;
+      padding: 6px 16px;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--amber);
+      margin-bottom: 28px;
+    }
+
+    .hero-title {
+      font-size: clamp(22px, 4vw, 32px);
+      font-weight: 600;
+      color: var(--white-70);
+      max-width: 640px;
+      margin: 0 auto 40px;
+      line-height: 1.4;
+    }
+
+    /* ── De Teller ── */
+    .counter-wrapper {
+      position: relative;
+      display: inline-block;
+      margin-bottom: 20px;
+    }
+
+    .counter-glow {
+      position: absolute;
+      inset: -30px -60px;
+      background: radial-gradient(ellipse at center, var(--amber-glow) 0%, transparent 70%);
+      pointer-events: none;
+      border-radius: 50%;
+    }
+
+    .counter-display {
+      font-size: clamp(48px, 10vw, 100px);
+      font-weight: 900;
+      font-variant-numeric: tabular-nums;
+      font-family: 'Inter', monospace;
+      color: var(--amber);
+      letter-spacing: -2px;
+      text-shadow:
+        0 0 40px rgba(251, 191, 36, 0.6),
+        0 0 80px rgba(251, 191, 36, 0.3),
+        0 2px 4px rgba(0,0,0,0.5);
+      line-height: 1;
+      position: relative;
+    }
+
+    .counter-euro {
+      font-size: 0.55em;
+      vertical-align: middle;
+      margin-right: 4px;
+      opacity: 0.85;
+    }
+
+    .counter-subtitle {
+      font-size: 16px;
+      color: var(--white-70);
+      margin-top: 16px;
+      font-weight: 400;
+    }
+
+    .counter-subtitle strong {
+      color: var(--amber);
+      font-weight: 700;
+    }
+
+    /* Pulserende dot */
+    .live-indicator {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 24px;
+      font-size: 13px;
+      color: var(--white-40);
+      font-weight: 500;
+    }
+
+    .live-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #22c55e;
+      animation: pulse-dot 2s ease-in-out infinite;
+      flex-shrink: 0;
+    }
+
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(0.85); }
+    }
+
+    /* ── Context Stats ── */
+    .stats-section {
+      background: var(--navy);
+      padding: 64px 24px;
+      border-top: 1px solid var(--white-08);
+      border-bottom: 1px solid var(--white-08);
+    }
+
+    .stats-inner {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .stats-header {
+      text-align: center;
+      margin-bottom: 48px;
+    }
+
+    .stats-header h2 {
+      font-size: clamp(20px, 3vw, 28px);
+      font-weight: 700;
+      color: var(--white);
+      margin-bottom: 8px;
+    }
+
+    .stats-header p {
+      font-size: 15px;
+      color: var(--white-70);
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+
+    @media (max-width: 600px) {
+      .stats-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+      }
+    }
+
+    .stat-card {
+      background: var(--white-08);
+      border: 1px solid var(--white-15);
+      border-radius: 16px;
+      padding: 28px 20px;
+      text-align: center;
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-2px);
+      border-color: rgba(251, 191, 36, 0.4);
+    }
+
+    .stat-icon {
+      font-size: 28px;
+      margin-bottom: 12px;
+    }
+
+    .stat-label {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--white-40);
+      margin-bottom: 8px;
+    }
+
+    .stat-value {
+      font-size: clamp(22px, 3.5vw, 32px);
+      font-weight: 800;
+      color: var(--amber);
+      letter-spacing: -0.5px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .stat-desc {
+      font-size: 13px;
+      color: var(--white-70);
+      margin-top: 6px;
+    }
+
+    /* ── CTA Sectie ── */
+    .cta-section {
+      background: linear-gradient(135deg, var(--navy-dark) 0%, var(--navy) 100%);
+      padding: 80px 24px;
+      text-align: center;
+    }
+
+    .cta-inner {
+      max-width: 640px;
+      margin: 0 auto;
+    }
+
+    .cta-section h2 {
+      font-size: clamp(26px, 4vw, 40px);
+      font-weight: 800;
+      color: var(--white);
+      line-height: 1.2;
+      margin-bottom: 16px;
+      letter-spacing: -0.5px;
+    }
+
+    .cta-section h2 em {
+      color: var(--amber);
+      font-style: normal;
+    }
+
+    .cta-section p {
+      font-size: 17px;
+      color: var(--white-70);
+      margin-bottom: 36px;
+      line-height: 1.6;
+    }
+
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--amber);
+      color: var(--navy-dark);
+      font-size: 17px;
+      font-weight: 700;
+      padding: 16px 36px;
+      border-radius: 100px;
+      text-decoration: none;
+      transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+      box-shadow: 0 4px 24px rgba(251, 191, 36, 0.4);
+    }
+
+    .btn-primary:hover {
+      background: var(--amber-dark);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 32px rgba(251, 191, 36, 0.5);
+    }
+
+    .btn-primary:active {
+      transform: translateY(0);
+    }
+
+    .cta-trust {
+      margin-top: 20px;
+      font-size: 13px;
+      color: var(--white-40);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    /* ── Embed Sectie ── */
+    .embed-section {
+      background: var(--navy-dark);
+      padding: 64px 24px;
+      border-top: 1px solid var(--white-08);
+    }
+
+    .embed-inner {
+      max-width: 760px;
+      margin: 0 auto;
+    }
+
+    .embed-section h2 {
+      font-size: clamp(20px, 3vw, 28px);
+      font-weight: 700;
+      color: var(--white);
+      margin-bottom: 8px;
+      text-align: center;
+    }
+
+    .embed-section > .embed-inner > p {
+      text-align: center;
+      color: var(--white-70);
+      font-size: 15px;
+      margin-bottom: 32px;
+    }
+
+    .embed-card {
+      background: rgba(0,0,0,0.3);
+      border: 1px solid var(--white-15);
+      border-radius: 16px;
+      overflow: hidden;
+    }
+
+    .embed-card-header {
+      background: var(--white-08);
+      padding: 12px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--white-08);
+    }
+
+    .embed-card-header span {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--white-40);
+    }
+
+    .btn-copy {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--navy-light);
+      color: var(--white);
+      border: 1px solid var(--white-15);
+      border-radius: 8px;
+      padding: 6px 14px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s ease, border-color 0.2s ease;
+      font-family: inherit;
+    }
+
+    .btn-copy:hover {
+      background: var(--amber);
+      color: var(--navy-dark);
+      border-color: var(--amber);
+    }
+
+    .btn-copy.copied {
+      background: #22c55e;
+      color: white;
+      border-color: #22c55e;
+    }
+
+    .embed-code {
+      padding: 20px;
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      font-size: 13px;
+      color: #a8d8a8;
+      line-height: 1.6;
+      white-space: pre-wrap;
+      word-break: break-all;
+      overflow-x: auto;
+    }
+
+    .embed-preview {
+      margin-top: 24px;
+      padding: 20px;
+      background: var(--white-08);
+      border: 1px solid var(--white-15);
+      border-radius: 16px;
+    }
+
+    .embed-preview p {
+      font-size: 13px;
+      color: var(--white-40);
+      text-align: center;
+      margin-bottom: 16px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-weight: 600;
+    }
+
+    .mini-counter-demo {
+      background: var(--navy);
+      border-radius: 12px;
+      padding: 20px 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      border: 1px solid var(--white-08);
+    }
+
+    .mini-counter-demo .mini-label {
+      font-size: 11px;
+      color: var(--white-40);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .mini-counter-demo .mini-value {
+      font-size: 32px;
+      font-weight: 900;
+      color: var(--amber);
+      font-variant-numeric: tabular-nums;
+      letter-spacing: -0.5px;
+      text-shadow: 0 0 20px rgba(251, 191, 36, 0.4);
+    }
+
+    .mini-counter-demo .mini-sub {
+      font-size: 11px;
+      color: var(--white-70);
+    }
+
+    /* ── Footer ── */
+    footer {
+      background: rgba(0,0,0,0.5);
+      border-top: 1px solid var(--white-08);
+      padding: 40px 24px;
+      text-align: center;
+    }
+
+    .footer-inner {
+      max-width: 760px;
+      margin: 0 auto;
+    }
+
+    .footer-logo {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 20px;
+      text-decoration: none;
+    }
+
+    .footer-logo-icon {
+      width: 32px;
+      height: 32px;
+      background: var(--amber);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      color: var(--navy-dark);
+      font-weight: 900;
+    }
+
+    .footer-logo-text {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--white);
+    }
+
+    .footer-methodology {
+      font-size: 13px;
+      color: var(--white-40);
+      line-height: 1.7;
+      margin-bottom: 20px;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .footer-methodology a {
+      color: var(--amber);
+      text-decoration: none;
+    }
+
+    .footer-methodology a:hover {
+      text-decoration: underline;
+    }
+
+    .footer-divider {
+      border: none;
+      border-top: 1px solid var(--white-08);
+      margin: 20px auto;
+      max-width: 200px;
+    }
+
+    .footer-copy {
+      font-size: 12px;
+      color: var(--white-40);
+    }
+
+    /* ── Utility ── */
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+  </style>
+</head>
+<body>
+
+  <!-- § Regen Canvas -->
+  <canvas id="rain-canvas"></canvas>
+
+  <!-- ── Header ── -->
+  <header>
+    <div class="header-logo">
+
+      <div class="logo-text">
+        <h1>De Nationale Regeldruk Meter</h1>
+        <p>Een initiatief van <a href="https://mkb-regelradar.nl" target="_blank" rel="noopener">mkb-regelradar.nl</a></p>
+      </div>
+    </div>
+    <div class="header-cta">
+      <a href="https://mkb-regelradar.nl/calculator" class="btn-primary" style="font-size:14px; padding:10px 22px;">
+        Bereken jouw kosten →
+      </a>
+    </div>
+  </header>
+
+  <!-- ── Hero ── -->
+  <section class="hero">
+    <div class="hero-label">🔴 Live teller</div>
+
+    <p class="hero-title" id="hero-title">
+      Het Nederlandse MKB heeft in 2026 tot nu toe <span id="miljard-label">al bijna €3 miljard</span> uitgegeven aan compliance:
+    </p>
+
+    <div class="counter-wrapper">
+      <div class="counter-glow"></div>
+      <div class="counter-display" id="main-counter">
+        <span class="counter-euro">€</span><span id="counter-value">—</span>
+      </div>
+    </div>
+
+    <p class="counter-subtitle">
+      Elke seconde komt er <strong>€285</strong> bij
+    </p>
+
+    <div class="live-indicator">
+      <span class="live-dot"></span>
+      <span id="live-sub">Live berekend op basis van seconden verstreken sinds 1 januari 2026</span>
+    </div>
+  </section>
+
+  <!-- ── Stats ── -->
+  <section class="stats-section">
+    <div class="stats-inner">
+      <div class="stats-header">
+        <h2>De MKB regeldruk kosten in perspectief</h2>
+
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon">📅</div>
+          <div class="stat-label">Per dag</div>
+          <div class="stat-value">€19.726.027</div>
+          <div class="stat-desc">Elke dag, werkdag of niet</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">⏰</div>
+          <div class="stat-label">Per uur</div>
+          <div class="stat-value">€821.918</div>
+          <div class="stat-desc">Ongeacht dag of nacht</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">⚡</div>
+          <div class="stat-label">Per seconde</div>
+          <div class="stat-value">€285</div>
+          <div class="stat-desc">Terwijl jij dit leest</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── CTA ── -->
+  <section class="cta-section">
+    <div class="cta-inner">
+      <h2>Wat kost het <em>jóu?</em></h2>
+      <p>
+        Wat kosten de administratieve lasten en naleving bij veranderende wet- en regelgeving jóuw onderneming? Bereken het in 2 minuten.
+      </p>
+      <a href="https://mkb-regelradar.nl/calculator" class="btn-primary" target="_blank" rel="noopener">
+        Bereken jouw compliance-kosten →
+      </a>
+    </div>
+  </section>
+
+  <!-- ── Embed ── -->
+  <section class="embed-section">
+    <div class="embed-inner">
+      <h2>Deel de teller</h2>
+      <p>Voeg de teller toe aan jouw website of blog en laat jouw lezers het live zien.</p>
+
+      <div class="embed-card">
+        <div class="embed-card-header">
+          <span>HTML embed code</span>
+          <button class="btn-copy" id="copy-btn" onclick="copyEmbed()">
+            <span id="copy-icon">📋</span>
+            <span id="copy-text">Kopieer code</span>
+          </button>
+        </div>
+        <pre class="embed-code" id="embed-snippet">&lt;iframe src="https://regeldrukmeter.nl" width="100%" height="200" frameborder="0" style="border-radius:12px;"&gt;&lt;/iframe&gt;</pre>
+      </div>
+
+      <div class="embed-preview">
+        <p>Voorbeeld embed — mini weergave</p>
+        <div class="mini-counter-demo">
+          <div class="mini-label" id="mini-label">🇳🇱 MKB compliance-kosten 2026</div>
+          <div class="mini-value" id="mini-counter">€—</div>
+          <div class="mini-sub">€285 per seconde · <a href="https://mkb-regelradar.nl" style="color: var(--amber); text-decoration: none;">mkb-regelradar.nl</a></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Footer ── -->
+  <footer>
+    <div class="footer-inner">
+
+
+      <p class="footer-methodology">
+        <strong>Verantwoording:</strong> 1,6 miljoen MKB-bedrijven (CBS, 2025) × gemiddeld ~€5.580/jaar aan compliance-kosten.
+        Gebaseerd op gemeten ~365 uur/jaar compliance-werk per bedrijf (CijferAdvies, Prinsjesdag 2025),
+        gewogen naar bedrijfsgrootte, sector en rechtsvorm.
+        Totaal: ongeveer 9 miljard euro per jaar = €285 per seconde.
+      </p>
+
+      <hr class="footer-divider">
+
+      <p class="footer-copy">
+        © 2026 <a href="https://mkb-regelradar.nl" style="color: var(--amber); text-decoration: none;">mkb-regelradar.nl</a>
+        — De Nationale Regeldruk Meter
+      </p>
+    </div>
+  </footer>
+
+  <script>
+    // ── Constanten ──
+    const PER_YEAR = 9_000_000_000;
+    const PER_SECOND = PER_YEAR / 365 / 24 / 3600;
+    const MLD = 1_000_000_000;
+    const SWITCH_THRESHOLD = 2 * MLD;
+
+    function getYearStart(year) {
+      return new Date(year + '-01-01T00:00:00Z').getTime();
+    }
+
+    function getMilestoneText(total) {
+      const miljard = Math.floor(total / MLD);
+      const fractie = (total % MLD) / MLD;
+      return fractie >= 0.5
+        ? `al bijna €${miljard + 1} miljard`
+        : `meer dan €${miljard} miljard`;
+    }
+
+    // ── Formatteer in Nederlandse notatie ──
+    function formatNL(value) {
+      // Hele euros, punten als duizendscheiding
+      const rounded = Math.floor(value);
+      return rounded.toLocaleString('nl-NL');
+    }
+
+    // ── Teller update via requestAnimationFrame ──
+    function updateCounter() {
+      const now = Date.now();
+      const currentYear = new Date(now).getUTCFullYear();
+      const yearStart = getYearStart(currentYear);
+      const totalThisYear = Math.max(0, (now - yearStart) / 1000) * PER_SECOND;
+      const sixMonthsAgo = now - 6 * 30.44 * 24 * 3600 * 1000;
+      const total6Month = ((now - sixMonthsAgo) / 1000) * PER_SECOND;
+      const use6Month = totalThisYear < SWITCH_THRESHOLD;
+      const total = use6Month ? total6Month : totalThisYear;
+
+      // Update hero-titel dynamisch
+      const heroEl = document.getElementById('hero-title');
+      if (heroEl) {
+        const milestone = getMilestoneText(use6Month ? total6Month : totalThisYear);
+        if (use6Month) {
+          heroEl.innerHTML = `In de afgelopen 6 maanden gaf het Nederlandse MKB <span id="miljard-label">${milestone}</span> uit aan compliance:`;
+        } else {
+          heroEl.innerHTML = `Het Nederlandse MKB heeft in ${currentYear} tot nu toe <span id="miljard-label">${milestone}</span> uitgegeven aan compliance:`;
+        }
+      }
+
+      const formatted = formatNL(total);
+
+      const counterEl = document.getElementById('counter-value');
+      const miniEl = document.getElementById('mini-counter');
+
+      if (counterEl) counterEl.textContent = formatted;
+      if (miniEl) miniEl.textContent = '€' + formatted;
+      const miniLabelEl = document.getElementById('mini-label');
+      const liveSubEl = document.getElementById('live-sub');
+      if (liveSubEl) {
+        liveSubEl.textContent = use6Month
+          ? 'Live berekend op basis van de afgelopen 6 maanden'
+          : `Live berekend op basis van seconden verstreken sinds 1 januari ${currentYear}`;
+      }
+      if (miniLabelEl) {
+        miniLabelEl.textContent = use6Month
+          ? '🇳🇱 MKB compliance-kosten afgelopen 6 maanden'
+          : `🇳🇱 MKB compliance-kosten ${currentYear}`;
+      }
+
+      // Miljard label: springt bij elke miljard
+      // miljard-label wordt bijgewerkt via hero innerHTML hierboven
+
+      requestAnimationFrame(updateCounter);
+    }
+
+    // Start de teller
+    requestAnimationFrame(updateCounter);
+
+    // ── Kopieer embed code ──
+    function copyEmbed() {
+      const snippet = document.getElementById('embed-snippet').textContent;
+      const btn = document.getElementById('copy-btn');
+      const icon = document.getElementById('copy-icon');
+      const text = document.getElementById('copy-text');
+
+      navigator.clipboard.writeText(snippet).then(() => {
+        btn.classList.add('copied');
+        icon.textContent = '✓';
+        text.textContent = 'Gekopieerd!';
+        setTimeout(() => {
+          btn.classList.remove('copied');
+          icon.textContent = '📋';
+          text.textContent = 'Kopieer code';
+        }, 2500);
+      }).catch(() => {
+        // Fallback voor oudere browsers
+        const ta = document.createElement('textarea');
+        ta.value = snippet;
+        ta.style.position = 'fixed';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+        icon.textContent = '✓';
+        text.textContent = 'Gekopieerd!';
+        setTimeout(() => {
+          icon.textContent = '📋';
+          text.textContent = 'Kopieer code';
+        }, 2500);
+      });
+    }
+
+    // ── § Regen Animatie ──
+    (function initRain() {
+      const canvas = document.getElementById('rain-canvas');
+      const ctx = canvas.getContext('2d');
+
+      let W, H;
+      let drops = [];
+
+      function resize() {
+        W = canvas.width = window.innerWidth;
+        H = canvas.height = window.innerHeight;
+      }
+
+      function createDrop() {
+        return {
+          x: Math.random() * W,
+          y: Math.random() * H - H,
+          speed: 0.3 + Math.random() * 0.8,
+          opacity: 0.3 + Math.random() * 0.7,
+          size: 10 + Math.floor(Math.random() * 14),
+          char: '§',
+          drift: (Math.random() - 0.5) * 0.2,
+        };
+      }
+
+      function init() {
+        resize();
+        drops = [];
+        const count = Math.floor((W * H) / 18000);
+        for (let i = 0; i < count; i++) {
+          const d = createDrop();
+          d.y = Math.random() * H; // Spread vertically on init
+          drops.push(d);
+        }
+      }
+
+      function draw() {
+        ctx.clearRect(0, 0, W, H);
+        ctx.fillStyle = '#FBBF24';
+
+        for (const d of drops) {
+          ctx.font = `${d.size}px Inter, sans-serif`;
+          ctx.globalAlpha = d.opacity * 0.5;
+          ctx.fillText(d.char, d.x, d.y);
+
+          d.y += d.speed;
+          d.x += d.drift;
+
+          if (d.y > H + 20) {
+            d.y = -20;
+            d.x = Math.random() * W;
+            d.speed = 0.3 + Math.random() * 0.8;
+            d.opacity = 0.3 + Math.random() * 0.7;
+          }
+        }
+
+        ctx.globalAlpha = 1;
+        requestAnimationFrame(draw);
+      }
+
+      window.addEventListener('resize', () => {
+        resize();
+        // Herbereken drop count bij resize
+        const target = Math.floor((W * H) / 18000);
+        while (drops.length < target) drops.push(createDrop());
+        if (drops.length > target) drops.length = target;
+      });
+
+      init();
+      draw();
+    })();
+  </script>
+
+</body>
+</html>
