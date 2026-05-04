@@ -938,5 +938,19 @@
     })();
   </script>
 
+<script>
+(function() {
+  try {
+    fetch('https://mkb-regelradar.nl/api/analytics', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        path: 'regeldrukmeter:' + window.location.pathname,
+        referrer: document.referrer || null
+      })
+    });
+  } catch(e) {}
+})();
+</script>
 </body>
 </html>
