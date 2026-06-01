@@ -651,7 +651,7 @@
     </div>
 
     <p class="counter-subtitle">
-      Elke seconde komt er <strong>€285</strong> bij
+      Elke seconde komt er <strong id="counter-per-sec-label">€285</strong> bij
     </p>
 
     <div class="live-indicator">
@@ -672,19 +672,19 @@
         <div class="stat-card">
           <div class="stat-icon">📅</div>
           <div class="stat-label">Per dag</div>
-          <div class="stat-value">€19.726.027</div>
+          <div class="stat-value" id="stat-per-dag">€24.657.534</div>
           <div class="stat-desc">Elke dag, werkdag of niet</div>
         </div>
         <div class="stat-card">
           <div class="stat-icon">⏰</div>
           <div class="stat-label">Per uur</div>
-          <div class="stat-value">€821.918</div>
+          <div class="stat-value" id="stat-per-uur">€1.027.397</div>
           <div class="stat-desc">Ongeacht dag of nacht</div>
         </div>
         <div class="stat-card">
           <div class="stat-icon">⚡</div>
           <div class="stat-label">Per seconde</div>
-          <div class="stat-value">€285</div>
+          <div class="stat-value" id="stat-per-sec">€285</div>
           <div class="stat-desc">Terwijl jij dit leest</div>
         </div>
       </div>
@@ -726,7 +726,7 @@
         <div class="mini-counter-demo">
           <div class="mini-label" id="mini-label">🇳🇱 MKB compliance-kosten 2026</div>
           <div class="mini-value" id="mini-counter">€—</div>
-          <div class="mini-sub">€285 per seconde · <a href="https://mkb-regelradar.nl" style="color: var(--amber); text-decoration: none;">mkb-regelradar.nl</a></div>
+          <div class="mini-sub"><span id="mini-per-sec">€285</span> per seconde · <a href="https://mkb-regelradar.nl" style="color: var(--amber); text-decoration: none;">mkb-regelradar.nl</a></div>
         </div>
       </div>
     </div>
@@ -754,9 +754,26 @@
   </footer>
 
   <script>
-    // ── Constanten ──
-    const PER_YEAR = 9_000_000_000;
-    const PER_SECOND = PER_YEAR / 365 / 24 / 3600;
+    // ── Constanten (single source of truth) ──
+    const JAARTOTAAL_EUR = 9_000_000_000; // €9 miljard/jaar
+    const PER_YEAR = JAARTOTAAL_EUR; // alias voor backwards-compat
+    const PER_SECOND  = JAARTOTAAL_EUR / (365 * 24 * 3600);
+    const PER_HOUR    = JAARTOTAAL_EUR / (365 * 24);
+    const PER_DAY     = JAARTOTAAL_EUR / 365;
+    const PER_WEEK    = JAARTOTAAL_EUR / 52;
+    const PER_MONTH   = JAARTOTAAL_EUR / 12;
+
+    // Render perspectief-kaarten en labels vanuit constanten (NL-notatie)
+    function renderPerspectief() {
+      const el = (id) => document.getElementById(id);
+      const fmtEur = (n) => '\u20ac' + Math.round(n).toLocaleString('nl-NL');
+      if (el('stat-per-dag'))         el('stat-per-dag').textContent         = fmtEur(PER_DAY);
+      if (el('stat-per-uur'))         el('stat-per-uur').textContent         = fmtEur(PER_HOUR);
+      if (el('stat-per-sec'))         el('stat-per-sec').textContent         = fmtEur(PER_SECOND);
+      if (el('counter-per-sec-label')) el('counter-per-sec-label').textContent = fmtEur(PER_SECOND);
+      if (el('mini-per-sec'))           el('mini-per-sec').textContent           = fmtEur(PER_SECOND);
+    }
+    renderPerspectief();
     const MLD = 1_000_000_000;
     const SWITCH_THRESHOLD = 2 * MLD;
 
