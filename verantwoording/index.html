@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <title>Methodiek en bronnen — Nationale Regeldruk Meter</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="canonical" href="https://regeldrukmeter.nl/verantwoording">
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 720px; margin: 3rem auto;
+           padding: 0 1.5rem; color: #1a1a2e; line-height: 1.7; }
+    h1 { color: #1a365d; }
+    h2 { color: #1a365d; margin-top: 2rem; border-bottom: 1px solid #e2e8f0;
+         padding-bottom: .4rem; }
+    h3 { color: #1a365d; }
+    a { color: #d97706; }
+    .formula { background: #f8fafc; border-left: 4px solid #FBBF24;
+               padding: 1rem 1.5rem; border-radius: 4px; margin: 1.5rem 0; }
+    .note { background: #fffbeb; border-left: 4px solid #f59e0b;
+            padding: .75rem 1.25rem; border-radius: 4px; margin: 1rem 0;
+            font-size: .95em; }
+    .back { margin-top: 3rem; font-size: .9em; }
+  </style>
+</head>
+<body>
+  <h1>Methodiek en bronnen</h1>
+  <p>Deze pagina legt de berekening achter de
+     <a href="/">Nationale Regeldruk Meter</a> volledig uit.</p>
+
+  <h2>De formule</h2>
+  <div class="formula">
+    <p><strong>Basis:</strong> PwC Nederland (juli 2026) — nalevingskosten bedrijfsleven =
+       <strong>€9,1 miljard per jaar</strong>.</p>
+    <p><strong>Berekening:</strong> €9.100.000.000 ÷ 31.536.000 seconden/jaar =
+       <strong>€288,56 per seconde</strong>.</p>
+    <p><strong>Teller:</strong> afgerond naar beneden op <strong>€288 per seconde</strong>
+       (marge &lt;0,2%).</p>
+  </div>
+
+  <h2>Bronnen</h2>
+
+  <h3>1. Totale nalevingskosten bedrijfsleven: €9,1 miljard per jaar</h3>
+  <p>
+    <a href="https://www.pwc.nl/nl/actueel-en-publicaties/themas/economie/kosten-van-het-naleven-van-wet-en-regelgeving.html"
+       target="_blank" rel="noopener noreferrer">
+      PwC Nederland — Naleven van wet- en regelgeving kost Nederlandse economie 16,8 miljard
+      euro per jaar (juli 2026)
+    </a><br>
+    Exacte tekst: <em>"de 9,1 miljard euro aan nalevingskosten in de private sector."</em><br>
+    Het onderzoek analyseerde 923 beroepen en bijna 19.000 taken via LLM's, gekoppeld aan
+    werkgelegenheids- en loondata.
+  </p>
+  <div class="note">
+    <strong>Kanttekening:</strong> PwC rapporteert over de gehele <em>private sector</em>,
+    inclusief groot- en middenbedrijf. Een uitsplitsing naar MKB-specifieke nalevingskosten
+    geeft het rapport niet. PwC stelt wel dat kleine bedrijven relatief zwaarder worden
+    getroffen, maar kwantificeert dit niet. Het MKB-aandeel is niet uit dit rapport te isoleren;
+    PwC stelt wel dat kleine bedrijven relatief zwaarder worden getroffen.
+  </div>
+
+  <h3>2. Aantal bedrijven (context)</h3>
+  <p>
+    <a href="https://www.cbs.nl/nl-nl/nieuws/2025/47/bedrijven-in-het-mkb-groeien-beperkt-door"
+       target="_blank" rel="noopener noreferrer">
+      CBS — Bedrijven in het mkb groeien beperkt door (november 2025)
+    </a><br>
+    Exacte tekst: <em>"Aan het begin van 2025 waren er ruim 1,6 miljoen mkb-bedrijven in
+    de business economy."</em> Dit omvat ZZP'ers, micro-, klein- en middenbedrijven.
+    Het CBS-getal wordt niet gebruikt als invoer voor de teller.
+  </p>
+
+  <h3>3. Tijdsbesteding: circa 7 uur per week (context)</h3>
+  <p>
+    <a href="https://cijferadvies.nl/regeldruk-blijft-een-groeiende-last-voor-mkb-ondernemers/"
+       target="_blank" rel="noopener noreferrer">
+      CijferAdvies — Regeldruk blijft een groeiende last voor mkb-ondernemers (2025)
+    </a><br>
+    Exacte tekst: <em>"Een gemiddelde mkb'er besteedt nu zo'n 7 uur per week aan
+    regeldruk."</em> Dit getal is opgenomen als context voor de tijdsbesteding per bedrijf.
+    Het is geen invoer voor de teller.
+  </p>
+
+  <h2>Noten</h2>
+  <ul>
+    <li>De teller loopt continu door; het jaarlijkse totaal is een vaste aanname
+        (€9,1 mrd), geen live meting.</li>
+    <li>31.536.000 seconden = 365 dagen × 24 uur × 3.600 seconden (geen schrikkeljaar).</li>
+    <li>Het exacte PwC-getal "9,1 miljard" staat op de PwC-pagina zelf; media parafraseren
+        dit als "ruim 9 miljard".</li>
+    <li>De teller meet nalevingskosten over de gehele private sector, niet uitsluitend
+        het MKB. De site richt zich op MKB-relevantie; de onderliggende PwC-meting is breder.</li>
+  </ul>
+
+  <p class="back"><a href="/">← Terug naar de meter</a></p>
+</body>
+</html>
