@@ -769,12 +769,13 @@
     // Render perspectief-kaarten en labels vanuit constanten (NL-notatie)
     function renderPerspectief() {
       const el = (id) => document.getElementById(id);
-      const fmtEur = (n) => '\u20ac' + Math.round(n).toLocaleString('nl-NL');
-      if (el('stat-per-dag'))         el('stat-per-dag').textContent         = fmtEur(PER_DAY);
-      if (el('stat-per-uur'))         el('stat-per-uur').textContent         = fmtEur(PER_HOUR);
-      if (el('stat-per-sec'))         el('stat-per-sec').textContent         = fmtEur(PER_SECOND);
-      if (el('counter-per-sec-label')) el('counter-per-sec-label').textContent = fmtEur(PER_SECOND);
-      if (el('mini-per-sec'))           el('mini-per-sec').textContent           = fmtEur(PER_SECOND);
+      const fmtEur      = (n) => '\u20ac' + Math.round(n).toLocaleString('nl-NL');
+      const fmtEurFloor = (n) => '\u20ac' + Math.floor(n).toLocaleString('nl-NL');
+      if (el('stat-per-dag'))          el('stat-per-dag').textContent          = fmtEur(PER_DAY);
+      if (el('stat-per-uur'))          el('stat-per-uur').textContent          = fmtEur(PER_HOUR);
+      if (el('stat-per-sec'))          el('stat-per-sec').textContent          = fmtEurFloor(PER_SECOND);
+      if (el('counter-per-sec-label')) el('counter-per-sec-label').textContent = fmtEurFloor(PER_SECOND);
+      if (el('mini-per-sec'))          el('mini-per-sec').textContent          = fmtEurFloor(PER_SECOND);
     }
     renderPerspectief();
     const MLD = 1_000_000_000;
