@@ -1,0 +1,5 @@
+{
+  "redirects": [
+    { "source": "/methodologie", "destination": "/methodologie.html", "permanent": false }
+  ]
+}
